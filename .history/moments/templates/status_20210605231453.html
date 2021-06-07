@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Status{% endblock %}
+{% block status %}class="active"{% endblock %}
+{% block searchword %}value={{ keyword }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for status in statuses %}
+        <div class="row">
+            <div class="col-md-2">
+                <img src="/static/image/{{status.user.pic}}" class="img-responsive img-thumbnail">
+            </div>
+            <div class="col-md-10">
+                <h1 style="font-size:70px">{{status.user}}</h1>
+                <p style="font-size:50px">{{status.text}}</p>
+                {% if status.pic %}
+                <div class="col-md-8">
+                    <img src="/static/image/{{status.pic}}" class="img-responsive">     
+                </div>
+                {% endif %}
+                <div class="col-md-12"> 
+                    <p style="float:left; color:gray; font-size:30px">{{status.pub_time}}</p>
+                    <button style="float:right;background-color:gray" class="btn btn-default"  
+                                {% comment %} Bootstrap 弹出框（Popover）插件 {% endcomment %}
+                                data-container="body" 
+                                data-toggle="popover" data-placement="left"
+                                data-html="true"
+                                data-content="<span style='cursor:pointer' onclick='like({{ status.id }})'><span class='glyphicon glyphicon-heart'></span>  Like  </span>
+                                               <span style='cursor:pointer' onclick='show_dialog({{ status.id }})'><span class='glyphicon glyphicon-comment'></span>  Comment  </span>">
+                        <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true" style="color:white"></span>
+                    </button>
+                </div>
+
+                {% if status.likes or status.comment %}
+                    <div class="col-md-12" style="background-color:gray; padding-top:20px">
+                        {% if status.likes %}
+                            <p style="font-size:30px"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
+                                {% for like in status.likes %}
+                                    {{ like.author }}{{ if not forloop }}, {% endif %}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                        {% for comment in status.comments %}
+                            {% comment %} 传入参数调用delete_or_comment {% endcomment %}
+                            <p style="font-size:30px" onclick="delete_or_comment('{{ comment.author }}','{{ user }}','{{ comment.id }}','{{ status.id }}')"> 
+                            {{comment.author}}{% if comment.at_person %}@{{ comment.at_person }}{% endif %}:{{comment.text}}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+        {% endfor %}        
+        <hr>
+        <div class="row">
+        <nav aria-label="Page navigation" align="right">
+            <ul class="pagination">
+                {% if statuses.has_previous %}
+                    <li>
+                        <a href="?page={{ statuses.previous_page_number }}&keyword={{ keyword }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in page_range %}
+                    <li {% ifequal num page  %}class="active"{% endifequal %} ><a href="?page={{ num }}&keyword={{ keyword }}">{{ num }}</a></li>
+                {% endfor %}
+                {% if statuses.has_next %}
+                    <li>
+                        <a href="?page={{ statuses.next_page_number }}&keyword={{ keyword }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        </div>
+    </div>
+{% endblock %}
